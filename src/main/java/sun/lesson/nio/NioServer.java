@@ -56,7 +56,7 @@ public class NioServer {
             /**
              * TODO 为什么这里是continue
              */
-            if(readyChannels == 0) continue;
+            if (readyChannels == 0) continue;
 
             /**
              * 7 调用selectionKeys获取channel的就绪集合
@@ -64,7 +64,7 @@ public class NioServer {
             Set<SelectionKey> selectionKeys = selector.selectedKeys();
             Iterator<SelectionKey> iterator = selectionKeys.iterator();
             while (iterator.hasNext()) {
-                 // SelectionKey的实例
+                // SelectionKey的实例
                 SelectionKey selectionKey = iterator.next();
 
                 // 移除Set中的当前Key
@@ -134,7 +134,7 @@ public class NioServer {
          * 循环读取客户端的请求信息
          */
         String request = "";
-        while(socketChannel.read(byteBuffer) > 0) {
+        while (socketChannel.read(byteBuffer) > 0) {
             // 切换写模式为读模式
             byteBuffer.flip();
 
@@ -151,12 +151,14 @@ public class NioServer {
          * 广播客户端的请求信息 （这里假装是一个聊天室）
          * TODO 广播
          */
-        System.out.println(request);
+        if (request.length() > 0) {
+            System.out.println(request);
+        }
     }
 
 
-    public static void main(String[] args) {
-
+    public static void main(String[] args) throws IOException {
+        new NioServer().start();
     }
 
 }
