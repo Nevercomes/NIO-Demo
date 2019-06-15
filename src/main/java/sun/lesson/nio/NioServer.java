@@ -152,8 +152,32 @@ public class NioServer {
          * TODO 广播
          */
         if (request.length() > 0) {
-            System.out.println(request);
+            broadCast(selector, socketChannel, request);
         }
+    }
+
+    private void broadCast(Selector selector, SocketChannel source, String request) {
+        /**
+         * 获取所有和服务器端连接的channel
+         * 这和selectedKeys不同的是它是不是selected 并非是就绪的？
+         */
+        Set<SelectionKey> selectionKeys = selector.keys();
+
+        /**
+         * 剔除不是socketChannel和源channel
+         */
+        selectionKeys.forEach(selectionKey -> {
+            Channel targetChannel = selectionKey.channel();
+            if(targetChannel instanceof SocketChannel && targetChannel != source) {
+                try {
+                    // 将消息发送到其它客户端
+                    ((SocketChannel) targetChannel).write(Charset.forName("UTF-8").encode(request));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        });
     }
 
 
