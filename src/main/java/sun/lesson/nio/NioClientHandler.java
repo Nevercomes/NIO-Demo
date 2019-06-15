@@ -26,6 +26,7 @@ public class NioClientHandler implements Runnable {
     @Override
     public void run() {
         try {
+            System.out.println("Client listening");
             /**
              * 6 在死循环里面调用selector的select方法 检测就绪情况
              */

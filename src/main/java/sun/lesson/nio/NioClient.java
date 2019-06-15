@@ -22,6 +22,15 @@ public class NioClient {
         System.out.println("Client start successfully");
 
         /**
+         * 接收服务端的响应
+         */
+        // 新开线程 专门来接收服务器端的响应
+        Selector selector = Selector.open();
+        socketChannel.configureBlocking(false);
+        socketChannel.register(selector, SelectionKey.OP_READ);
+        new Thread(new NioClientHandler(selector)).start();
+
+        /**
          * 向服务端发送数据
          */
         Scanner scanner = new Scanner(System.in);
@@ -31,15 +40,6 @@ public class NioClient {
                 socketChannel.write(Charset.forName("UTF-8").encode(request));
             }
         }
-
-        /**
-         * 接收服务端的响应
-         */
-        // 新开线程 专门来接收服务器端的响应
-        Selector selector = Selector.open();
-        socketChannel.configureBlocking(false);
-        socketChannel.register(selector, SelectionKey.OP_READ);
-        new Thread(new NioClientHandler(selector)).start();
 
     }
 
