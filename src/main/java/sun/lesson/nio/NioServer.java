@@ -2,9 +2,9 @@ package sun.lesson.nio;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
+import java.nio.ByteBuffer;
+import java.nio.channels.*;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -74,17 +74,84 @@ public class NioServer {
                  * 8 判断就绪事件种类 处理对应的业务逻辑
                  */
 
-                // TODO 接入事件
+                // 接入事件
+                if (selectionKey.isAcceptable()) {
+                    acceptHandler(serverSocketChannel, selector);
+                }
 
-                // TODO 可读事件
+                // 可读事件
+                if (selectionKey.isReadable()) {
+                    readHandler(selectionKey, selector);
+                }
 
             }
         }
-
         /**
          * 9 根据业务情况判断是否要再次注册到selector上 重复执行第三步
          */
+    }
 
+    /**
+     * 接入事件处理器
+     */
+    private void acceptHandler(ServerSocketChannel serverSocketChannel, Selector selector) throws IOException {
+        /**
+         * 如果是接入事件 首先应该要创建socketChannel
+         */
+        SocketChannel socketChannel = serverSocketChannel.accept();
+
+        /**
+         * 将socketChannel设置为非阻塞模式
+         */
+        socketChannel.configureBlocking(false);
+
+        /**
+         * 将socketChannel注册到 selector上 并且设置为监听 可读 事件
+         */
+        socketChannel.register(selector, SelectionKey.OP_READ);
+
+        /**
+         * 回复客户端消息
+         */
+        socketChannel.write(Charset.forName("UTF-8").encode("Connect successfully"));
+    }
+
+    /**
+     * 可读事件处理器
+     */
+    private void readHandler(SelectionKey selectionKey, Selector selector) throws IOException {
+        /**
+         * 从selectionKey中获取到就绪的channel
+         */
+        SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
+
+        /**
+         * 创建buffer
+         */
+        ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+
+        /**
+         * 循环读取客户端的请求信息
+         */
+        String request = "";
+        while(socketChannel.read(byteBuffer) > 0) {
+            // 切换写模式为读模式
+            byteBuffer.flip();
+
+            // 读取buffer中的内容
+            request += Charset.forName("UTF-8").decode(byteBuffer);
+        }
+
+        /**
+         * 再次注册到selector上 并且监听 可读事件
+         */
+        socketChannel.register(selector, SelectionKey.OP_READ);
+
+        /**
+         * 广播客户端的请求信息 （这里假装是一个聊天室）
+         * TODO 广播
+         */
+        System.out.println(request);
     }
 
 
