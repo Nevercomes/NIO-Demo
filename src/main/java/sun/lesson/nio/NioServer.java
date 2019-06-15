@@ -49,12 +49,13 @@ public class NioServer {
          */
         for (; ; ) {
             /**
-             * TODO 获取可用的channel数量
+             * 获取可用的channel数量
              */
             int readyChannels = selector.select();
 
             /**
-             * TODO 为什么这里是continue
+             * 为什么这里是continue
+             * 防止空轮询
              */
             if (readyChannels == 0) continue;
 
